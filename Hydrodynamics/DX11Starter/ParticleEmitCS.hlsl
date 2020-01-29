@@ -16,10 +16,11 @@ cbuffer ExternalData : register(b0)
 	float3 velRange;
 	int maxParticle;
 
+	int totalParticles;
+
 }
 
 RWStructuredBuffer<Particle> ParticlePool : register(u0);
-ConsumeStructuredBuffer<uint> DeadList	  : register(u1);
 
 float rand(float2 co) {
 	return 0.5 + (frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453)) * 0.5;
@@ -33,16 +34,15 @@ void main(uint3 id : SV_DispatchThreadID)
 		return;
 	}
 
-	uint emitIndex = DeadList.Consume();
 
 	//random number generation
 	float random[6];
 	for (unsigned int i = 0; i < 6; i++)
 	{
-		random[i] = rand((float2((float)emitIndex, (float)i)));
+		random[i] = rand((float2((float)id.x, (float)i)));
 	}
 
-	Particle emitParticle = ParticlePool.Load(emitIndex);
+	Particle emitParticle = ParticlePool.Load(id.x);
 
 	emitParticle.Age = 0.0f;
 	emitParticle.Size = startSize;
@@ -57,5 +57,5 @@ void main(uint3 id : SV_DispatchThreadID)
 	emitParticle.Position.y = startPos.y + (((random[4] - 0.5) * 4) - 1) * posRange.y;
 	emitParticle.Position.z = startPos.z + (((random[5] - 0.5) * 4) - 1) * posRange.z;
 
-	ParticlePool[emitIndex] = emitParticle;
+	ParticlePool[id.x] = emitParticle;
 }

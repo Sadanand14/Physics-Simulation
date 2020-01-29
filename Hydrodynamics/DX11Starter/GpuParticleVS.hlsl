@@ -13,8 +13,6 @@ StructuredBuffer<ParticleDraw>  DrawList		: register(t1);
 struct VertexToPixel
 {
 	float4 position	: SV_POSITION;
-	float4 color	: COLOR;
-	float2 uv		: TEXCOORD;
 };
 
 VertexToPixel main( uint id : SV_VertexID)
@@ -40,15 +38,6 @@ VertexToPixel main( uint id : SV_VertexID)
 
 	matrix wvp = mul(mul(world, view), projection);
 	output.position = mul(float4(pos, 1.0f), wvp);
-
-	float2 uvs[4];
-	uvs[0] = float2(0, 0);
-	uvs[1] = float2(1, 0);
-	uvs[2] = float2(1, 1);
-	uvs[3] = float2(0, 1);
-
-	output.color = particle.Color;
-	output.uv = saturate(uvs[cornerID]);
 
 	return output;
 }

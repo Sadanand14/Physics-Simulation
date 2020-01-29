@@ -146,7 +146,7 @@ void Game::Init()
 
 	emitterGpu = new GPUEmitter(
 		1000, 100.0f,
-		3.0f, 0.1f,
+		3.0f, 1.0f,
 		2.0f,
 		XMFLOAT3(-2, 0, 5),
 		XMFLOAT3(-2, 2, 0),

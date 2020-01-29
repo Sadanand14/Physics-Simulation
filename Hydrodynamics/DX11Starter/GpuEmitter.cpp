@@ -1,4 +1,5 @@
 #include "GpuEmitter.h"
+#include <iostream>
 
 float GPUEmitter::s_emitTimeCounter = 0;
 
@@ -94,27 +95,27 @@ GPUEmitter::GPUEmitter
 
 	particlePoolBuff->Release();
 
-	//DeadList
-	ID3D11Buffer* deadBuffer;
-	D3D11_BUFFER_DESC deadDesc = {};
-	deadDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	deadDesc.ByteWidth = sizeof(unsigned int) * m_maxParticles;
-	deadDesc.CPUAccessFlags = 0;
-	deadDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	deadDesc.StructureByteStride = sizeof(unsigned int);
-	deadDesc.Usage = D3D11_USAGE_DEFAULT;
-	device->CreateBuffer(&deadDesc, 0, &deadBuffer);
+	////DeadList
+	//ID3D11Buffer* deadBuffer;
+	//D3D11_BUFFER_DESC deadDesc = {};
+	//deadDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	//deadDesc.ByteWidth = sizeof(unsigned int) * m_maxParticles;
+	//deadDesc.CPUAccessFlags = 0;
+	//deadDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	//deadDesc.StructureByteStride = sizeof(unsigned int);
+	//deadDesc.Usage = D3D11_USAGE_DEFAULT;
+	//device->CreateBuffer(&deadDesc, 0, &deadBuffer);
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC deadUAVDesc = {};
-	deadUAVDesc.Format = DXGI_FORMAT_UNKNOWN;
-	deadUAVDesc.Buffer.FirstElement = 0;
-	deadUAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
-	deadUAVDesc.Buffer.NumElements = m_maxParticles;
-	deadUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	//D3D11_UNORDERED_ACCESS_VIEW_DESC deadUAVDesc = {};
+	//deadUAVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	//deadUAVDesc.Buffer.FirstElement = 0;
+	//deadUAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
+	//deadUAVDesc.Buffer.NumElements = m_maxParticles;
+	//deadUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 
-	device->CreateUnorderedAccessView(deadBuffer, &deadUAVDesc, &m_deadParticleUAV);
+	//device->CreateUnorderedAccessView(deadBuffer, &deadUAVDesc, &m_deadParticleUAV);
 
-	deadBuffer->Release();
+	//deadBuffer->Release();
 
 	//DrawList
 	ID3D11Buffer* drawBuff;
@@ -215,14 +216,16 @@ void GPUEmitter::Update(float dt, float totaltime)
 {
 	ID3D11UnorderedAccessView* none[8] = {};
 	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
-
+	
+	static int totalParticles = 0;
+	
 	s_emitTimeCounter += dt;
-
-	if (s_emitTimeCounter >= m_timePerEmit)
+	if (s_emitTimeCounter >= m_timePerEmit && totalParticles<= m_maxParticles)
 	{
 		int emitCount = (int)(s_emitTimeCounter / m_timePerEmit);
 		emitCount = min(emitCount, 65535);
-
+		totalParticles += emitCount;
+		std::cout << "Total Particles: " << totalParticles;
 		s_emitTimeCounter = fmod(s_emitTimeCounter, m_timePerEmit);
 
 		m_emitParticleCS->SetShader();
