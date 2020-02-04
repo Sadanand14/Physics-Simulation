@@ -8,7 +8,6 @@ cbuffer ExternalData : register(b0)
 }
 
 RWStructuredBuffer<Particle> ParticlePool : register (u0);
-RWStructuredBuffer<ParticleDraw> DrawList : register (u2);
 
 [numthreads(32, 1, 1)]
 void main( uint3 id : SV_DispatchThreadID )
@@ -19,9 +18,12 @@ void main( uint3 id : SV_DispatchThreadID )
 
 	if (particle.Alive == 0.0f) return;
 
-	particle.Age += dt;
-	//particle.Alive = (float)(particle.Age < lifeTime);
+	//update the initialized particles
 	particle.Position += particle.Velocity * dt;
+	
+	//particle.Age += dt;
+	//particle.Alive = (float)(particle.Age < lifeTime);
+	
 
 	//particle.Age += dt;
 
@@ -29,14 +31,14 @@ void main( uint3 id : SV_DispatchThreadID )
 	//particle.Color = startColor + (endColor - startColor) * agePercentage;
 	//particle.Size = startSize + (endSize - startSize) * agePercentage;
 
-	ParticlePool[id.x] = particle;
+	//ParticlePool[id.x] = particle;
 
 
-	uint drawIndex = DrawList.IncrementCounter();
+	//uint drawIndex = DrawList.IncrementCounter();
 
-	ParticleDraw drawData;
-	drawData.Index = id.x;
-	//drawData.DistanceSq = 0.0f;
+	//ParticleDraw drawData;
+	//drawData.Index = id.x;
+	////drawData.DistanceSq = 0.0f;
 
-	DrawList[drawIndex] = drawData;
+	//DrawList[drawIndex] = drawData;
 }

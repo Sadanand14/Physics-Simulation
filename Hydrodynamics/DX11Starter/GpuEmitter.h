@@ -28,7 +28,7 @@ class GPUEmitter
 private:
 
 	static float s_emitTimeCounter;
-	unsigned int m_maxParticles, m_emitRate;
+	unsigned int m_maxParticles, m_emitRate, m_currentCount, m_vertexCount;
 	float m_timePerEmit, m_lifeTime;
 
 	//emitterDescriptors
@@ -37,14 +37,15 @@ private:
 	DirectX::XMFLOAT4 m_startColor, m_endColor, m_rotRange;
 
 	SimpleComputeShader* m_initParticlesCS = nullptr,* m_updateParticleCS = nullptr,* m_emitParticleCS = nullptr,* m_updateArgsBufferCS = nullptr;
+
 	SimpleVertexShader* m_VS = nullptr;
 	SimplePixelShader* m_PS = nullptr;
 	ID3D11DeviceContext* m_context = nullptr;
 
 
-	ID3D11Buffer* m_indexBuff = nullptr , * m_drawArgsBuff = nullptr;
+	ID3D11Buffer* m_indexBuff = nullptr , * m_drawArgsBuff = nullptr, *m_vertexBuffer = nullptr;
 	ID3D11UnorderedAccessView* m_particlePoolUAV = nullptr, * m_deadParticleUAV = nullptr , * m_drawParticleUAV = nullptr, * m_drawArgsUAV = nullptr;
-	ID3D11ShaderResourceView* m_particlePoolSRV = nullptr, * m_drawParticleSRV = nullptr, * m_texture = nullptr;
+	ID3D11ShaderResourceView* m_particlePoolSRV = nullptr, * m_drawParticleSRV = nullptr;
 	ID3D11DepthStencilState* m_depthState = nullptr;
 	ID3D11BlendState* m_blendState = nullptr;
 
@@ -57,7 +58,8 @@ public:
 		DirectX::XMFLOAT4 rotRange, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor,
 		ID3D11Device* device, ID3D11DeviceContext* context,
 		SimpleComputeShader* initParticles, SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles, 
-		SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader, ID3D11ShaderResourceView* texture
+		SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
+		ID3D11Buffer* vertexBuffer, unsigned int vertexCount
 	);
 
 	~GPUEmitter();

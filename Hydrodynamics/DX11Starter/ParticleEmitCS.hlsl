@@ -2,22 +2,17 @@
 
 cbuffer ExternalData : register(b0)
 {
-	float4 startColor;
-
 	float3 startPos;
 	int emitCount;
 
 	float3 posRange;
-	float totalTime;
+	int activeParticles;
 
 	float3 startVel;
-	float startSize;
-
-	float3 velRange;
 	int maxParticle;
 
-	int totalParticles;
-
+	float3 velRange;
+	float startSize;
 }
 
 RWStructuredBuffer<Particle> ParticlePool : register(u0);
@@ -29,24 +24,21 @@ float rand(float2 co) {
 [numthreads(32, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-	if (id.x >= (uint) emitCount)
-	{
+	uint particleIndex = id.x + activeParticles;
+	uint totalCount = emitCount + activeParticles;
+	if (particleIndex >= (uint)totalCount)
 		return;
-	}
-
-
+	
 	//random number generation
 	float random[6];
 	for (unsigned int i = 0; i < 6; i++)
 	{
-		random[i] = rand((float2((float)id.x, (float)i)));
+		random[i] = rand((float2((float)particleIndex, (float)i)));
 	}
 
-	Particle emitParticle = ParticlePool.Load(id.x);
+	Particle emitParticle = ParticlePool.Load(particleIndex);
 
-	emitParticle.Age = 0.0f;
 	emitParticle.Size = startSize;
-	emitParticle.Color = startColor;
 	emitParticle.Alive = 1.0f;
 
 	emitParticle.Velocity.x = startVel.x + (((random[0] - 0.5) * 4) - 1)* velRange.x;
@@ -57,5 +49,5 @@ void main(uint3 id : SV_DispatchThreadID)
 	emitParticle.Position.y = startPos.y + (((random[4] - 0.5) * 4) - 1) * posRange.y;
 	emitParticle.Position.z = startPos.z + (((random[5] - 0.5) * 4) - 1) * posRange.z;
 
-	ParticlePool[id.x] = emitParticle;
+	ParticlePool[particleIndex] = emitParticle;
 }
