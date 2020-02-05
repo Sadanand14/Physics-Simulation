@@ -9,13 +9,10 @@
 
 struct GPUParticle 
 {
-	DirectX::XMFLOAT4 Color;
-	float Age;
 	DirectX::XMFLOAT3 position;
 	float Size;
 	DirectX::XMFLOAT3 velocity;
 	float Alive;
-	DirectX::XMFLOAT3 padding;
 };
 
 struct ParticleSort

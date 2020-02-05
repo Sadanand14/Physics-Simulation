@@ -145,7 +145,7 @@ void Game::Init()
 	rSamp.MaxLOD = D3D11_FLOAT32_MAX;
 
 	emitterGpu = new GPUEmitter(
-		1000, 100.0f,
+		1, 100.0f,
 		3.0f, 1.0f,
 		2.0f,
 		XMFLOAT3(-2, 0, 5),
@@ -163,7 +163,8 @@ void Game::Init()
 		particleSetArgsBuffCS,
 		gpuParticleVS,
 		gpuParticlePS,
-		texMap["particle"]->GetSRV()
+		meshMap["sphere"]->GetVertexBuffer(),
+		meshMap["sphere"]->GetVertexCount()
 	);
 
 	// Ask DirectX for the actual object

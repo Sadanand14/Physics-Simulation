@@ -2,9 +2,9 @@
 
 cbuffer ExternalData : register(b0) 
 {
-	//float startSize;
 	float dt;
-	int maxParticles;
+	int activeCount;
+	float2 trash;
 }
 
 RWStructuredBuffer<Particle> ParticlePool : register (u0);
@@ -12,7 +12,7 @@ RWStructuredBuffer<Particle> ParticlePool : register (u0);
 [numthreads(32, 1, 1)]
 void main( uint3 id : SV_DispatchThreadID )
 {
-	if (id.x >= (uint)maxParticles) return;
+	//if (id.x >= (uint)activeCount) { return; }
 
 	Particle particle = ParticlePool.Load(id.x);
 
@@ -20,7 +20,7 @@ void main( uint3 id : SV_DispatchThreadID )
 
 	//update the initialized particles
 	particle.Position += particle.Velocity * dt;
-	
+	return;
 	//particle.Age += dt;
 	//particle.Alive = (float)(particle.Age < lifeTime);
 	

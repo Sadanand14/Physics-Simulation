@@ -7,6 +7,7 @@ class Mesh
 {
 	ID3D11Buffer *vertexPointer = nullptr, *indexPointer = nullptr;
 	int indexCount=NULL;
+	unsigned int vertexCount;
 	//Vertex*VertexArr=nullptr;
 	//unsigned int* indexarr=nullptr;
 public: 
@@ -16,6 +17,10 @@ public:
 	Mesh(const char* objFile, ID3D11Device* device);
 	~Mesh();
 	
+	inline unsigned int GetVertexCount()
+	{
+		return vertexCount; 
+	}
 	ID3D11Buffer* GetVertexBuffer() { return vertexPointer; }
 	ID3D11Buffer* GetIndexBuffer() { return indexPointer; }
 	int GetIndexCount() { return indexCount; }
@@ -27,6 +32,7 @@ public:
 template<typename T>
 void Mesh::CreatingBuffer(T* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
 {
+	vertexCount = totalVertices;
 	indexCount = totalIndices;
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -50,7 +56,6 @@ void Mesh::CreatingBuffer(T* vertextArray, unsigned int* intArray, int totalVert
 	D3D11_SUBRESOURCE_DATA initialIndexData;
 	initialIndexData.pSysMem = intArray;
 	device->CreateBuffer(&ibd, &initialIndexData, &indexPointer);
-
 }
 
 template<typename T>
