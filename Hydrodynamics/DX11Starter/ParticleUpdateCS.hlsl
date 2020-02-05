@@ -2,9 +2,11 @@
 
 cbuffer ExternalData : register(b0) 
 {
+	float3 gravity;
 	float dt;
+	float diametre;
+	float separationSpeed;
 	int activeCount;
-	float2 trash;
 }
 
 RWStructuredBuffer<Particle> ParticlePool : register (u0);
@@ -20,25 +22,31 @@ void main( uint3 id : SV_DispatchThreadID )
 
 	//update the initialized particles
 	particle.Position += particle.Velocity * dt;
+	particle.Velocity += gravity*dt;
+
+	int r, rx,ry,rz;
+	Particle currentParticle;
+	for (uint i = 0; i < activeCount && i!=id.x; ++i) 
+	{
+		currentParticle = ParticlePool.Load(i);
+		rx = currentParticle.Position.x - particle.Position.x;
+		ry = currentParticle.Position.y - particle.Position.y;
+		rz = currentParticle.Position.z - particle.Position.z;
+		r = sqrt(rx*rx + ry*ry + rz*rz);
+		if (r < diametre) 
+		{
+			float3 direction = particle.Position - currentParticle.Position;
+			direction = normalize(direction);
+
+			particle.Velocity += direction * separationSpeed * dt;
+		}
+		else 
+		{
+			//TODO::collision Check
+		}
+	}
+
+	ParticlePool[id.x] = particle;
+
 	return;
-	//particle.Age += dt;
-	//particle.Alive = (float)(particle.Age < lifeTime);
-	
-
-	//particle.Age += dt;
-
-	//float agePercentage = particle.Age / lifeTime;
-	//particle.Color = startColor + (endColor - startColor) * agePercentage;
-	//particle.Size = startSize + (endSize - startSize) * agePercentage;
-
-	//ParticlePool[id.x] = particle;
-
-
-	//uint drawIndex = DrawList.IncrementCounter();
-
-	//ParticleDraw drawData;
-	//drawData.Index = id.x;
-	////drawData.DistanceSq = 0.0f;
-
-	//DrawList[drawIndex] = drawData;
 }

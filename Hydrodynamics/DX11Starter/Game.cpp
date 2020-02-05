@@ -144,27 +144,22 @@ void Game::Init()
 	rSamp.MaxAnisotropy = 16;
 	rSamp.MaxLOD = D3D11_FLOAT32_MAX;
 
+
 	emitterGpu = new GPUEmitter(
-		1, 100.0f,
-		3.0f, 1.0f,
-		2.0f,
+		1000, 100.0f,
 		XMFLOAT3(-2, 0, 5),
 		XMFLOAT3(-2, 2, 0),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),
 		XMFLOAT3(0.2f, 0.2f, 0.2f),
-		XMFLOAT4(-2, 2, -2, 2),
-		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
-		XMFLOAT4(1, 0.6f, 0.1f, 0.f),
 		device,
 		context,
-		particledeadInitCS,
 		particleUpdateCS,
 		particleEmitCS,
-		particleSetArgsBuffCS,
 		gpuParticleVS,
 		gpuParticlePS,
 		meshMap["sphere"]->GetVertexBuffer(),
-		meshMap["sphere"]->GetVertexCount()
+		meshMap["sphere"]->GetVertexCount(),
+		meshMap["sphere"]->GetWidth()
 	);
 
 	// Ask DirectX for the actual object

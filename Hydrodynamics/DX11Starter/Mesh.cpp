@@ -11,10 +11,12 @@ using namespace DirectX;
 
 
 
-Mesh::Mesh(const char* objFile, ID3D11Device* device)
+Mesh::Mesh(const char* objFile, ID3D11Device* device) :width(0)
 {
 	// File input object
 	std::ifstream obj(objFile);
+
+	
 
 	// Check for successful open
 	if (!obj.is_open())
@@ -70,6 +72,7 @@ Mesh::Mesh(const char* objFile, ID3D11Device* device)
 				chars,
 				"v %f %f %f",
 				&pos.x, &pos.y, &pos.z);
+
 
 			// Add to the positions
 			positions.push_back(pos);
@@ -186,6 +189,50 @@ Mesh::Mesh(const char* objFile, ID3D11Device* device)
 	// - Yes, the indices are a bit redundant here (one per vertex).  Could you skip using
 	//    an index buffer in this case?  Sure!  Though, if your mesh class assumes you have
 	//    one, you'll need to write some extra code to handle cases when you don't.
+}
+
+void Mesh::CreatingBuffer(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
+{
+	float xmin = FLT_MAX, xmax = -FLT_MAX;
+	DirectX::XMFLOAT3 pos;
+	for (unsigned int i = 0; i < totalVertices; ++i)
+	{
+		pos = vertextArray[i].Position;
+		if (pos.x > xmax) xmax = pos.x;
+		if (pos.x < xmin) xmin = pos.x;
+	}
+
+	width = xmax - xmin;
+	vertexCount = totalVertices;
+	indexCount = totalIndices;
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex) * totalVertices;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA initialVertexData;
+	initialVertexData.pSysMem = vertextArray;
+	device->CreateBuffer(&vbd, &initialVertexData, &vertexPointer);
+
+	//creating buffer for the indices
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(int) * totalIndices;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects         
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA initialIndexData;
+	initialIndexData.pSysMem = intArray;
+	device->CreateBuffer(&ibd, &initialIndexData, &indexPointer);
+}
+
+Mesh::Mesh(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device) :width(0)
+{
+	//creating buffer for the vertices
+	CreatingBuffer(vertextArray, intArray, totalVertices, totalIndices, device);
 }
 
 Mesh::~Mesh()

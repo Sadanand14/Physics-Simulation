@@ -26,7 +26,7 @@ private:
 
 	static float s_emitTimeCounter;
 	unsigned int m_maxParticles, m_emitRate, m_currentCount, m_vertexCount;
-	float m_timePerEmit, m_lifeTime;
+	float m_timePerEmit, m_lifeTime, m_width;
 
 	//emitterDescriptors
 	float m_startSize, m_endSize;
@@ -50,13 +50,12 @@ public:
 
 	GPUEmitter
 	(
-		unsigned int maxParticles, unsigned int emitRate, float lifeTime, float startSize, float EndSize,
+		unsigned int maxParticles, unsigned int emitRate,
 		DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
-		DirectX::XMFLOAT4 rotRange, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor,
 		ID3D11Device* device, ID3D11DeviceContext* context,
-		SimpleComputeShader* initParticles, SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles, 
-		SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
-		ID3D11Buffer* vertexBuffer, unsigned int vertexCount
+		SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
+		SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
+		ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth
 	);
 
 	~GPUEmitter();
