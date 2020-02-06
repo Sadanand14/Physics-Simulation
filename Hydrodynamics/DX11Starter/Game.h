@@ -48,11 +48,10 @@ private:
 	// Initialization helper methods - feel free to customize, combine, etc.
 	void LoadShaders();
 	void CreateMatrices();
-	void CreateBasicGeometry();
 	void LoadModelDirectory();
 	void LoadTextureDirectory();
 	void RenderSky();
-
+	void DrawContainer(DirectX::XMFLOAT3* cornerArry);
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr, * indexBuffer = nullptr;

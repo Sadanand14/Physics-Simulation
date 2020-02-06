@@ -12,8 +12,6 @@ StructuredBuffer<Particle>ParticlePool	: register(t0);
 struct VS_Input 
 {
 	float3 position	: POSITION;
-	float3 normal	: NORMAL;
-	float2 UV		: TEXCOORD;
 };
 
 struct VertexToPixel

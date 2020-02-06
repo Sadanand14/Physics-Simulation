@@ -113,7 +113,7 @@ void Game::Init()
 	LoadModelDirectory();
 	LoadTextureDirectory();
 	CreateMatrices();
-	CreateBasicGeometry();
+
 
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_FRONT;
@@ -165,9 +165,6 @@ void Game::Init()
 	// Ask DirectX for the actual object
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
-
-
-
 
 
 void Game::LoadShaders()
@@ -282,21 +279,8 @@ void Game::CreateMatrices()
 }
 
 
-void Game::CreateBasicGeometry()
+void Game::DrawContainer(DirectX::XMFLOAT3* cornerArry) 
 {
-	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
-
-	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-
-	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
-
-	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-
-	entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
 
 }
 
