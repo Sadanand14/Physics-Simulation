@@ -9,6 +9,7 @@
 #include "Textures.h"
 #include "Materials.h";
 #include "types.h"
+#include "Container.h"
 #include "GpuEmitter.h"
 
 class Game
@@ -30,7 +31,7 @@ public:
 	std::map<std::string, Mesh*> meshMap;
 	std::map<std::string, Texture*> texMap;
 
-
+	Container* m_container;
 	// Overridden setup and game loop methods, which
 	// will be called automatically
 	void Init();

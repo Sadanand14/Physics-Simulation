@@ -145,6 +145,17 @@ void Game::Init()
 	rSamp.MaxLOD = D3D11_FLOAT32_MAX;
 
 
+	XMFLOAT3* temp = new XMFLOAT3[8];
+	temp[0] = XMFLOAT3(-2.5f, -5.0f, 2.5f);
+	temp[1] = XMFLOAT3(2.5f, -5.0f, 2.5f);
+	temp[2] = XMFLOAT3(2.5f, -10.0f, 2.5f);
+	temp[3] = XMFLOAT3(-2.5f, -10.0f, 2.5f);
+	temp[4] = XMFLOAT3(-2.5f, -5.0f, -2.5f);
+	temp[5] = XMFLOAT3(2.5f, -5.0f, -2.5f);
+	temp[6] = XMFLOAT3(2.5f, -10.0f, -2.5f);
+	temp[7] = XMFLOAT3(-2.5f, -10.0f, -2.5f);
+	m_container = new Container(temp, device, context, vertexShader, pixelShader);
+
 	emitterGpu = new GPUEmitter(
 		1000, 100.0f,
 		XMFLOAT3(-2, 0, 5),
@@ -348,6 +359,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//GPU using a vector of entities.
 	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	RenderSky();
+	m_container->DrawContainer(camera);
 	////////////
 	//DrawWater(deltaTime);
 

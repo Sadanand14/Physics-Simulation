@@ -63,5 +63,5 @@ void Container::DrawContainer(Camera * camera)
 	m_VS->SetMatrix4x4("view", camera->GetView());
 	m_VS->SetMatrix4x4("projection", camera->GetProjection());
 	m_VS->CopyAllBufferData();
-
+	m_context->DrawIndexed(30, 0, 0);
 }
