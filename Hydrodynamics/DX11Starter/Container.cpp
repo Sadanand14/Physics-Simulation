@@ -1,9 +1,16 @@
 #include "Container.h"
 
 Container::Container(DirectX::XMFLOAT3* cornerArr, ID3D11Device* device, ID3D11DeviceContext* context,
-	SimpleVertexShader* vs, SimplePixelShader* ps)
-	: m_device(device), m_context(context), m_VS(vs), m_PS(ps)
+	SimpleVertexShader* vs, SimplePixelShader* ps, XMFLOAT3 pos, XMFLOAT3 scale)
+	: m_device(device), m_context(context), m_VS(vs), m_PS(ps), m_position(pos), m_scale(scale)
 {
+
+	XMMATRIX trans = XMMatrixTranslation(pos.x,pos.y,pos.z);
+	XMMATRIX Scale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	
+	XMMATRIX res = Scale * trans;
+	XMStoreFloat4x4(&m_modelMatrix, XMMatrixTranspose(res));
+
 	m_cornerArr.reserve(8);
 	std::vector<Vertex> vertexArr;
 	for (unsigned int i = 0; i < 8; ++i) 
@@ -42,10 +49,53 @@ Container::Container(DirectX::XMFLOAT3* cornerArr, ID3D11Device* device, ID3D11D
 	D3D11_SUBRESOURCE_DATA initialIndexData;
 	initialIndexData.pSysMem = indexArr;
 	m_device->CreateBuffer(&ibd, &initialIndexData, &m_ib);
+
+	//rasterState for debugging particles
+	D3D11_RASTERIZER_DESC rasterdesc = {};
+	rasterdesc.CullMode = D3D11_CULL_NONE;
+	rasterdesc.DepthClipEnable = true;
+	rasterdesc.FillMode = D3D11_FILL_WIREFRAME;
+	device->CreateRasterizerState(&rasterdesc, &m_debugRaster);
+
+}
+
+
+void Container::CalculatePlanes() 
+{
+	unsigned int indices[] = { 0,1,2
+							  ,5,3,6
+							  ,1,4,7
+							  ,4,5,6
+							  ,2,7,6 };
+
+	XMVECTOR displacement;
+
+	for(unsigned int i = 0; i < 5; ++i) 
+	{
+		XMMATRIX model = XMMatrixTranspose(XMLoadFloat4x4(&m_modelMatrix));
+
+		//TODO:: ADD DISPLACEMENT BASED ON MODEL SCALE AND TRANSLATION
+		XMVECTOR vec1 = XMLoadFloat3(&m_cornerArr[indices[i * 3]]);
+		vec1 = XMVector3Transform(vec1, model);
+
+
+		XMVECTOR vec2 = XMLoadFloat3(&m_cornerArr[indices[i * 3 +1]]);
+		XMVECTOR vec3 = XMLoadFloat3(&m_cornerArr[indices[i * 3 +2]]);
+		/*XMFLOAT3 VecA = XMFLOAT3(vec2.x-vec1.x, vec2.y - vec1.y, vec2.z- vec1.z);
+		XMFLOAT3 VecB = XMFLOAT3(vec3.x-vec1.x, vec3.y - vec1.y, vec3.z- vec1.z);*/
+		XMVECTOR vecA = vec2 - vec1;
+		XMVECTOR vecB = vec3 - vec1;
+		XMVECTOR normal = XMVector3Normalize(XMVector3Cross(vecA, vecB));
+		XMFLOAT3 Normal;
+		XMStoreFloat3(&Normal, normal);
+		float d = m_cornerArr[indices[i * 3]].x*Normal.x + m_cornerArr[indices[i * 3]].y * Normal.y + m_cornerArr[indices[i * 3]].z * Normal.z;
+		d *= -1;
+	}
 }
 
 Container::~Container() 
 {
+	if (m_debugRaster != nullptr) m_debugRaster->Release();
 	if (m_vb) m_vb->Release();
 	if (m_ib) m_ib->Release();
 }
@@ -53,13 +103,14 @@ Container::~Container()
 void Container::DrawContainer(Camera * camera) 
 {
 	static unsigned int offset = 0;
-	static unsigned int stride = 0;
+	static unsigned int stride = sizeof(Vertex);
 	m_context->IASetVertexBuffers(0, 1, &m_vb, &stride, &offset);
 	m_context->IASetIndexBuffer(m_ib, DXGI_FORMAT_R32_UINT, 0);
 
+	m_context->RSSetState(m_debugRaster);
 	m_VS->SetShader();
 	m_PS->SetShader();
-	m_VS->SetMatrix4x4("world", DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+	m_VS->SetMatrix4x4("world", m_modelMatrix);
 	m_VS->SetMatrix4x4("view", camera->GetView());
 	m_VS->SetMatrix4x4("projection", camera->GetProjection());
 	m_VS->CopyAllBufferData();

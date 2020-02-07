@@ -65,7 +65,7 @@ Game::~Game()
 	if (gpuParticleVS != nullptr) delete gpuParticleVS;
 	if (gpuParticlePS != nullptr) delete gpuParticlePS;
 	if (emitterGpu != nullptr) delete emitterGpu;
-
+	if (m_container != nullptr) delete m_container;
 	//clear sky stuff
 	if (skyRS != nullptr)
 		skyRS->Release();
@@ -146,16 +146,16 @@ void Game::Init()
 
 
 	XMFLOAT3* temp = new XMFLOAT3[8];
-	temp[0] = XMFLOAT3(-2.5f, -5.0f, 2.5f);
-	temp[1] = XMFLOAT3(2.5f, -5.0f, 2.5f);
-	temp[2] = XMFLOAT3(2.5f, -10.0f, 2.5f);
-	temp[3] = XMFLOAT3(-2.5f, -10.0f, 2.5f);
-	temp[4] = XMFLOAT3(-2.5f, -5.0f, -2.5f);
-	temp[5] = XMFLOAT3(2.5f, -5.0f, -2.5f);
-	temp[6] = XMFLOAT3(2.5f, -10.0f, -2.5f);
-	temp[7] = XMFLOAT3(-2.5f, -10.0f, -2.5f);
-	m_container = new Container(temp, device, context, vertexShader, pixelShader);
-
+	temp[0] = XMFLOAT3(-2.5f, 2.5f, 2.5f);
+	temp[1] = XMFLOAT3(2.5f, 2.5f, 2.5f);
+	temp[2] = XMFLOAT3(2.5f, -2.5f, 2.5f);
+	temp[3] = XMFLOAT3(-2.5f, -2.5f, 2.5f);
+	temp[4] = XMFLOAT3(2.5f, 2.5f, -2.5f);
+	temp[5] = XMFLOAT3(-2.5f, 2.5f, -2.5f);
+	temp[6] = XMFLOAT3(-2.5f, -2.5f, -2.5f);
+	temp[7] = XMFLOAT3(2.5f, -2.5f, -2.5f);
+	m_container = new Container(temp, device, context, vertexShader, pixelShader, XMFLOAT3(0,-10.0f,0), XMFLOAT3(10,3,10));
+	delete[] temp;
 	emitterGpu = new GPUEmitter(
 		1000, 100.0f,
 		XMFLOAT3(-2, 0, 5),
