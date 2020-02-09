@@ -2,6 +2,7 @@
 
 cbuffer ExternalData : register(b0) 
 {
+	float4 planeArr[5];
 	float3 gravity;
 	float dt;
 	float diametre;
@@ -26,7 +27,9 @@ void main( uint3 id : SV_DispatchThreadID )
 
 	int r, rx,ry,rz;
 	Particle currentParticle;
-	for (uint i = 0; i < activeCount && i!=id.x; ++i) 
+
+	//collision check with other particles
+	for (int i = 0; i < activeCount && i!=id.x; ++i) 
 	{
 		currentParticle = ParticlePool.Load(i);
 		rx = currentParticle.Position.x - particle.Position.x;
@@ -40,9 +43,32 @@ void main( uint3 id : SV_DispatchThreadID )
 
 			particle.Velocity += direction * separationSpeed * dt;
 		}
-		else 
+	}
+
+	//collision check with container
+	for (uint i = 0; i < 5; ++i) 
+	{
+		float3 particlePos = particle.Position;
+		float currentDis = planeArr[i].x * particlePos.x + planeArr[i].y * particlePos.y + planeArr[i].z * particlePos.z 
+							+ planeArr[i].w - diametre / 2;
+
+		if (currentDis > 0.1 * diametre) continue;
+		
+		float3 particleVel = particle.Velocity;
+		particlePos += (particleVel * dt);
+		float predictedDis = planeArr[i].x * (particlePos.x) + 
+							 planeArr[i].y * (particlePos.y) +
+							 planeArr[i].z * (particlePos.z) +
+							 planeArr[i].w - diametre / 2;
+		if (predictedDis < diametre * 0.05) 
 		{
-			//TODO::collision Check
+			//prevent particle from passing through the container boundary
+			float3 normal = float3(planeArr[i].x, planeArr[i].y, planeArr[i].z);
+			float dotProduct = dot(normal, particleVel);
+			dotProduct /= length(normal);
+			dotProduct *= -1;
+			float3 velocityToBeApplied = normalize(normal)* dotProduct;
+			particle.Velocity += velocityToBeApplied;
 		}
 	}
 

@@ -58,10 +58,8 @@ Game::Game(HINSTANCE hInstance)
 Game::~Game()
 {
 	//delete / Release GPU particles stuff
-	if (particledeadInitCS != nullptr) delete particledeadInitCS;
 	if (particleEmitCS != nullptr) delete particleEmitCS;
 	if (particleUpdateCS != nullptr) delete particleUpdateCS;
-	if (particleSetArgsBuffCS != nullptr) delete particleSetArgsBuffCS;
 	if (gpuParticleVS != nullptr) delete gpuParticleVS;
 	if (gpuParticlePS != nullptr) delete gpuParticlePS;
 	if (emitterGpu != nullptr) delete emitterGpu;
@@ -154,7 +152,8 @@ void Game::Init()
 	temp[5] = XMFLOAT3(-2.5f, 2.5f, -2.5f);
 	temp[6] = XMFLOAT3(-2.5f, -2.5f, -2.5f);
 	temp[7] = XMFLOAT3(2.5f, -2.5f, -2.5f);
-	m_container = new Container(temp, device, context, vertexShader, pixelShader, XMFLOAT3(0,-10.0f,0), XMFLOAT3(10,3,10));
+
+	m_container = new Container(temp, device, context, vertexShader, pixelShader, XMFLOAT3(0,-10.0f,0), XMFLOAT3(6,2,6));
 	delete[] temp;
 	emitterGpu = new GPUEmitter(
 		1000, 100.0f,
@@ -170,7 +169,8 @@ void Game::Init()
 		gpuParticlePS,
 		meshMap["sphere"]->GetVertexBuffer(),
 		meshMap["sphere"]->GetVertexCount(),
-		meshMap["sphere"]->GetWidth()
+		meshMap["sphere"]->GetWidth(),
+		m_container->GetPlanes()
 	);
 
 	// Ask DirectX for the actual object
@@ -186,18 +186,12 @@ void Game::LoadShaders()
 	gpuParticlePS = new SimplePixelShader(device, context);
 	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");
 
-	particledeadInitCS = new SimpleComputeShader(device, context);
-	particledeadInitCS->LoadShaderFile(L"ParticleDeadInitCS.cso");
-
 	particleEmitCS = new SimpleComputeShader(device, context);
 	particleEmitCS->LoadShaderFile(L"ParticleEmitCS.cso");
 
 	particleUpdateCS = new SimpleComputeShader(device, context);
 	particleUpdateCS->LoadShaderFile(L"ParticleUpdateCS.cso");
-
-	particleSetArgsBuffCS = new SimpleComputeShader(device, context);
-	particleSetArgsBuffCS->LoadShaderFile(L"ParticleSetArgsBuffCS.cso");
-
+	
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile(L"VertexShader.cso");
 

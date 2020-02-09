@@ -10,11 +10,14 @@ GPUEmitter::GPUEmitter
 	ID3D11Device* device, ID3D11DeviceContext* context,
 	SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
 	SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
-	ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth
+	ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth,
+	std::vector<DirectX::XMFLOAT4> planeArr
 )
 	: m_maxParticles(maxParticles),m_context(context), m_emitParticleCS(emitParticles), m_updateParticleCS(updateParticles),
-	m_VS(vertexShader), m_PS(pixelShader), m_vertexBuffer(vertexBuffer), m_vertexCount(vertexCount), m_currentCount(0), m_width(modelWidth)
-{
+	m_VS(vertexShader), m_PS(pixelShader), m_vertexBuffer(vertexBuffer), m_vertexCount(vertexCount), m_currentCount(0), m_width(modelWidth),
+	m_planeArr(planeArr)
+{	
+
 	m_emitterPos = emitterPos;
 	m_startVel = startVel;
 	m_posRange = posRange;
@@ -101,7 +104,7 @@ void GPUEmitter::Update(float dt, float totaltime)
 
 	static DirectX::XMFLOAT3 gravity = DirectX::XMFLOAT3(0.0f,-9.8f,0.0f);
 	static float separationSpeed = 0.1f;
-
+	m_updateParticleCS->SetData("planeArr", m_planeArr.data(), 5 * sizeof(XMFLOAT4));
 	m_updateParticleCS->SetFloat("separationSpeed", separationSpeed);
 	m_updateParticleCS->SetFloat("dt", dt);
 	m_updateParticleCS->SetFloat3("gravity", gravity);

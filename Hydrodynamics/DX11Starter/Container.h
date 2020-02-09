@@ -14,6 +14,7 @@ private:
 	ID3D11DeviceContext* m_context;
 	ID3D11RasterizerState* m_debugRaster = nullptr;
 	std::vector<DirectX::XMFLOAT3> m_cornerArr;
+	std::vector<DirectX::XMFLOAT4> m_planeArr;
 	XMFLOAT4X4 m_modelMatrix;
 	XMFLOAT3 m_scale;
 	XMFLOAT3 m_position;
@@ -26,5 +27,72 @@ public:
 	Container(DirectX::XMFLOAT3 * cornerArr, ID3D11Device* device, ID3D11DeviceContext* context, SimpleVertexShader* vs, SimplePixelShader* ps, XMFLOAT3  pos, XMFLOAT3  scale);
 	~Container();
 	
+	inline const std::vector<DirectX::XMFLOAT4> GetPlanes() const { return m_planeArr; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	void DrawContainer(Camera* camera);
 };

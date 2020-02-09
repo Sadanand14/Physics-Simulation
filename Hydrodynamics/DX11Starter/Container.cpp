@@ -22,6 +22,8 @@ Container::Container(DirectX::XMFLOAT3* cornerArr, ID3D11Device* device, ID3D11D
 		vertexArr.push_back(V);
 	}
 	
+	CalculatePlanes();
+
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex) * 8;
@@ -56,7 +58,8 @@ Container::Container(DirectX::XMFLOAT3* cornerArr, ID3D11Device* device, ID3D11D
 	rasterdesc.DepthClipEnable = true;
 	rasterdesc.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rasterdesc, &m_debugRaster);
-
+	
+	
 }
 
 
@@ -77,19 +80,32 @@ void Container::CalculatePlanes()
 		//TODO:: ADD DISPLACEMENT BASED ON MODEL SCALE AND TRANSLATION
 		XMVECTOR vec1 = XMLoadFloat3(&m_cornerArr[indices[i * 3]]);
 		vec1 = XMVector3Transform(vec1, model);
-
+		XMFLOAT4 point;
+		XMStoreFloat4(&point, vec1);
 
 		XMVECTOR vec2 = XMLoadFloat3(&m_cornerArr[indices[i * 3 +1]]);
+		vec2 = XMVector3Transform(vec2, model);
+
 		XMVECTOR vec3 = XMLoadFloat3(&m_cornerArr[indices[i * 3 +2]]);
+		vec3 = XMVector3Transform(vec3, model);
+
 		/*XMFLOAT3 VecA = XMFLOAT3(vec2.x-vec1.x, vec2.y - vec1.y, vec2.z- vec1.z);
 		XMFLOAT3 VecB = XMFLOAT3(vec3.x-vec1.x, vec3.y - vec1.y, vec3.z- vec1.z);*/
 		XMVECTOR vecA = vec2 - vec1;
 		XMVECTOR vecB = vec3 - vec1;
 		XMVECTOR normal = XMVector3Normalize(XMVector3Cross(vecA, vecB));
+		//XMVECTOR normal = XMVector3Cross(vecA, vecB);
 		XMFLOAT3 Normal;
 		XMStoreFloat3(&Normal, normal);
-		float d = m_cornerArr[indices[i * 3]].x*Normal.x + m_cornerArr[indices[i * 3]].y * Normal.y + m_cornerArr[indices[i * 3]].z * Normal.z;
+
+		float d = point.x*Normal.x + point.y * Normal.y + point.z * Normal.z;
 		d *= -1;
+		XMFLOAT4 coeff = XMFLOAT4(Normal.x, Normal.y, Normal.z, d);
+		//XMVECTOR plane = XMVector4Normalize(XMLoadFloat4(&coeff));
+		
+		 
+		//XMStoreFloat4(&coeff, plane);
+		m_planeArr.push_back(coeff);
 	}
 }
 
@@ -115,4 +131,5 @@ void Container::DrawContainer(Camera * camera)
 	m_VS->SetMatrix4x4("projection", camera->GetProjection());
 	m_VS->CopyAllBufferData();
 	m_context->DrawIndexed(30, 0, 0);
+	m_context->RSSetState(0);
 }

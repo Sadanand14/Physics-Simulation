@@ -66,7 +66,7 @@ private:
 	SimplePixelShader* pixelShader = nullptr;
 	
 	//GpuParticleStuff
-	SimpleComputeShader* particledeadInitCS = nullptr, * particleUpdateCS = nullptr, * particleEmitCS = nullptr, * particleSetArgsBuffCS = nullptr;
+	SimpleComputeShader * particleUpdateCS = nullptr, * particleEmitCS = nullptr;
 	SimpleVertexShader* gpuParticleVS = nullptr;
 	SimplePixelShader* gpuParticlePS = nullptr;
 

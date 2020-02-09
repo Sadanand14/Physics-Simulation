@@ -32,6 +32,7 @@ private:
 	float m_startSize, m_endSize;
 	DirectX::XMFLOAT3 m_emitterPos, m_startRot, m_startVel , m_posRange, m_velRange;
 	DirectX::XMFLOAT4 m_startColor, m_endColor, m_rotRange;
+	std::vector<XMFLOAT4> m_planeArr;
 
 	SimpleComputeShader* m_initParticlesCS = nullptr,* m_updateParticleCS = nullptr,* m_emitParticleCS = nullptr,* m_updateArgsBufferCS = nullptr;
 
@@ -55,7 +56,8 @@ public:
 		ID3D11Device* device, ID3D11DeviceContext* context,
 		SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
 		SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
-		ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth
+		ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth,
+		std::vector<DirectX::XMFLOAT4> planeArr
 	);
 
 	~GPUEmitter();
