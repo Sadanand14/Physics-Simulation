@@ -153,10 +153,10 @@ void Game::Init()
 	temp[6] = XMFLOAT3(-2.5f, -2.5f, -2.5f);
 	temp[7] = XMFLOAT3(2.5f, -2.5f, -2.5f);
 
-	m_container = new Container(temp, device, context, vertexShader, pixelShader, XMFLOAT3(0,-10.0f,0), XMFLOAT3(6,2,6));
+	m_container = new Container(temp, device, context, vertexShader, pixelShader, XMFLOAT3(0,-10.0f,0), XMFLOAT3(3,1,3));
 	delete[] temp;
 	emitterGpu = new GPUEmitter(
-		1000, 100.0f,
+		2000, 100.0f,
 		XMFLOAT3(-2, 0, 5),
 		XMFLOAT3(-2, 2, 0),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),

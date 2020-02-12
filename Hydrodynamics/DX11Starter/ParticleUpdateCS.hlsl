@@ -25,23 +25,50 @@ void main( uint3 id : SV_DispatchThreadID )
 	particle.Position += particle.Velocity * dt;
 	particle.Velocity += gravity*dt;
 
-	int r, rx,ry,rz;
+	float r, rx,ry,rz;
 	Particle currentParticle;
 
 	//collision check with other particles
 	for (int i = 0; i < activeCount && i!=id.x; ++i) 
 	{
+		//get current Particle
 		currentParticle = ParticlePool.Load(i);
+
+		//get distance between the two particles
 		rx = currentParticle.Position.x - particle.Position.x;
 		ry = currentParticle.Position.y - particle.Position.y;
 		rz = currentParticle.Position.z - particle.Position.z;
 		r = sqrt(rx*rx + ry*ry + rz*rz);
+
+		//if they are intersecting already, push them away
 		if (r < diametre) 
 		{
 			float3 direction = particle.Position - currentParticle.Position;
 			direction = normalize(direction);
 
 			particle.Velocity += direction * separationSpeed * dt;
+		}
+		//if they are close to intersecting, conserve their momentum in the direction of the line joining their centres
+		else if(r < diametre * 1.05) 
+		{
+			float3 postPos1 = particle.Position + particle.Velocity * dt;
+			float3 postPos2 = currentParticle.Position + currentParticle.Velocity * dt;
+			float postR, postRx, postRy, postRz;
+			postRx = postPos1.x - postPos2.x;
+			postRy = postPos1.y - postPos2.y;
+			postRz = postPos1.z - postPos2.z;
+			postR = sqrt(postRx * postRx + postRy * postRy + postRz * postRz);
+			if (postR < diametre) 
+			{
+				float3 direction = normalize(particle.Position - currentParticle.Position);
+				float speed1 = dot(particle.Velocity, direction);
+				float speed2 = dot(currentParticle.Velocity, direction);
+				float diff1 = (speed2 - speed1) / 2;
+				float diff2 = (speed1 - speed2) / 2;
+				particle.Velocity += diff1 * direction;
+				currentParticle.Velocity += diff2 * direction;
+			}
+			ParticlePool[i] = currentParticle;
 		}
 	}
 

@@ -103,7 +103,7 @@ void GPUEmitter::Update(float dt, float totaltime)
 	m_updateParticleCS->SetShader();
 
 	static DirectX::XMFLOAT3 gravity = DirectX::XMFLOAT3(0.0f,-9.8f,0.0f);
-	static float separationSpeed = 0.1f;
+	static float separationSpeed = 2.0f;
 	m_updateParticleCS->SetData("planeArr", m_planeArr.data(), 5 * sizeof(XMFLOAT4));
 	m_updateParticleCS->SetFloat("separationSpeed", separationSpeed);
 	m_updateParticleCS->SetFloat("dt", dt);
