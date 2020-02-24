@@ -28,9 +28,40 @@ void main( uint3 id : SV_DispatchThreadID )
 	float r, rx,ry,rz;
 	Particle currentParticle;
 
-	//collision check with other particles
+	static int wallCollision = 0, intersection = 0, internalCollision = 0;
+	static float3 blockedMoveDirections[5];
+
+	//collision detection with walls
+	for (uint i = 0; i < 5; ++i)
+	{
+		float3 particlePos = particle.Position;
+		float currentDis = planeArr[i].x * particlePos.x + planeArr[i].y * particlePos.y + planeArr[i].z * particlePos.z
+			+ planeArr[i].w - diametre / 2;
+
+		if (currentDis > 0.1 * diametre) continue;
+
+		float3 particleVel = particle.Velocity;
+		particlePos += (particleVel * dt);
+		float predictedDis = planeArr[i].x * (particlePos.x) +
+			planeArr[i].y * (particlePos.y) +
+			planeArr[i].z * (particlePos.z) +
+			planeArr[i].w - diametre / 2;
+		if (predictedDis < diametre * 0.05)
+		{
+			wallCollision = 1;
+			blockedMoveDirections[i] = -1 * float3(planeArr[i].x, planeArr[i].y, planeArr[i].z);
+		}
+		else 
+		{
+			blockedMoveDirections[i] = float3(0.0f, 0.0f, 0.0f);
+		}
+	}
+
+
+	//collision detection with other particles
 	for (int i = 0; i < activeCount && i!=id.x; ++i) 
 	{
+		
 		//get current Particle
 		currentParticle = ParticlePool.Load(i);
 
@@ -43,10 +74,7 @@ void main( uint3 id : SV_DispatchThreadID )
 		//if they are intersecting already, push them away
 		if (r < diametre) 
 		{
-			float3 direction = particle.Position - currentParticle.Position;
-			direction = normalize(direction);
-
-			particle.Velocity += direction * separationSpeed * dt;
+			intersection = 1;
 		}
 		//if they are close to intersecting, conserve their momentum in the direction of the line joining their centres
 		else if(r < diametre * 1.05) 
@@ -98,6 +126,12 @@ void main( uint3 id : SV_DispatchThreadID )
 			particle.Velocity += velocityToBeApplied;
 		}
 	}
+
+	//Collision response for intersection only
+	/*float3 direction = particle.Position - currentParticle.Position;
+	direction = normalize(direction);
+
+	particle.Velocity += direction * separationSpeed * dt;*/
 
 	ParticlePool[id.x] = particle;
 
