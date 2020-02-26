@@ -10,9 +10,11 @@
 struct GPUParticle 
 {
 	DirectX::XMFLOAT3 position;
-	float Size;
+	float Density;
 	DirectX::XMFLOAT3 velocity;
-	float Alive;
+	float Mass;
+	float Pressure; 
+	DirectX::XMFLOAT3 Garbage;
 };
 
 struct ParticleSort
@@ -26,7 +28,7 @@ private:
 
 	static float s_emitTimeCounter;
 	unsigned int m_maxParticles, m_emitRate, m_currentCount, m_vertexCount;
-	float m_timePerEmit, m_lifeTime, m_width;
+	float m_timePerEmit, m_lifeTime, m_width, m_kernel1,m_kernel2,m_h;
 
 	//emitterDescriptors
 	float m_startSize, m_endSize;

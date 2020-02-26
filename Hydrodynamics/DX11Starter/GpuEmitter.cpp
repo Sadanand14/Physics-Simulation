@@ -58,6 +58,9 @@ GPUEmitter::GPUEmitter
 
 	particlePoolBuff->Release();
 
+	m_h = 1.0f;
+	m_kernel1 = 315.0f / (64.0f * DirectX::XM_PI * pow(m_h, 9));
+	m_kernel2 = -45.0f / (DirectX::XM_PI * pow(m_h, 6));
 }
 
 GPUEmitter::~GPUEmitter()
@@ -110,6 +113,9 @@ void GPUEmitter::Update(float dt, float totaltime)
 	m_updateParticleCS->SetFloat3("gravity", gravity);
 	m_updateParticleCS->SetFloat("diametre", m_width);
 	m_updateParticleCS->SetInt("activeCount", m_currentCount);
+	m_updateParticleCS->SetFloat("kernel1", m_kernel1);
+	m_updateParticleCS->SetFloat("kernel2", m_kernel2);
+	m_updateParticleCS->SetFloat("h", m_h);
 	m_updateParticleCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
 	m_updateParticleCS->CopyAllBufferData();
 	m_updateParticleCS->DispatchByThreads(m_currentCount, 1, 1);

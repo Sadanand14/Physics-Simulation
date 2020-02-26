@@ -4,9 +4,11 @@
 struct Particle
 {
 	float3 Position;
-	float Size;
+	float Density;
 	float3 Velocity;
-	float Alive;
+	float Mass;
+	float Pressure;
+	float3 garbage;
 };
 
 //struct ParticleDraw
