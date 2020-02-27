@@ -15,7 +15,7 @@ cbuffer ExternalData : register(b0)
 
 RWStructuredBuffer<Particle> ParticlePool : register (u0);
 
-const float K = 250.0f, p0 = 1.0f;
+const float K = 250.0f, p0 = 1.0f , e = 0.016f;
 
 
 [numthreads(32, 1, 1)]
@@ -34,41 +34,49 @@ void main( uint3 id : SV_DispatchThreadID )
 	float r;
 	Particle currentParticle;
 
+	//calculate Density
 	for (unsigned int i = 0; i < activeCount; ++i) 
 	{
 		currentParticle = ParticlePool.Load(i);
 		const float3 dir = particle.Position - currentParticle.Position;
 		const float r2 = dot(dir, dir);
-		if (r2 < (h * h)) 
+		if ( r2 > 0 && r2 < (h * h) )
 		{
 			const float W1 = kernel1 * pow(((h * h) - r2), 3);
 			particle.Density += currentParticle.Mass * W1;
 		}
 	}
-
 	particle.Density = max(p0, particle.Density);
 
-	particle.Pressure = K * (particle.Density - p0);
+	//Pressure
+	float3 Pressure = K * (particle.Density - p0);
 
-	particle.P_Force = 0;
-
-
-	for (unsigned int i = 0; i < activeCount&& i!=id.x; ++i)
+	float3 P_Force = 0;
+	float3 V_Force = 0;
+	for (unsigned int i = 0; i < activeCount && i!=id.x; ++i)
 	{
 		currentParticle = ParticlePool.Load(i);
 		const float3 dir = particle.Position - currentParticle.Position;
 		const float r2 = dot(dir, dir);
 		const float r = sqrt(r2);
-		if (r2 < (h * h))
+		if (r > 0 && r<h )
 		{
 			const float3 rNorm = dir / r;
 			const float W2 = kernel2 * pow(h - r, 2);
-			particle.P_Force += (currentParticle.Mass / particle.Mass) * (2 * particle.Density * currentParticle.Density) * W2 * rNorm;
+			const float r3 = r2 * r;
+			const float W3 = -(r3 / (2 * pow(h, 3)))+ (r2 / pow(h, 2)) + (h / (2 * r)) - 1;
+
+			//add pressure forces;
+			P_Force += (currentParticle.Mass / particle.Mass) * (2 * particle.Density * currentParticle.Density) * W2 * rNorm;
+
+			//add Viscous Forces
+			V_Force += (currentParticle.Mass / particle.Mass) * (1.0f / currentParticle.Density) * (currentParticle.Velocity - particle.Velocity) * W3 * rNorm;
 		}
 	}	
+	P_Force *= -1;
+	V_Force *= e;
 
-	particle.P_Force *= -1;
-	
+	particle.Velocity += dt * (((P_Force + V_Force) / particle.Density) + gravity)*0.00001;
 	//int wallCollision = 0, intersection = 0, internalCollision = 0;
 	//float3 blockedMoveDirections[5];
 
@@ -174,7 +182,7 @@ void main( uint3 id : SV_DispatchThreadID )
 			dotProduct /= length(normal);
 			dotProduct *= -1;
 			float3 velocityToBeApplied = normalize(normal)* dotProduct;
-			particle.Velocity +=  velocityToBeApplied;
+			particle.Velocity +=  1.1*velocityToBeApplied;
 		}
 	}
 

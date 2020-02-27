@@ -8,12 +8,8 @@ struct Particle
 	float3 Velocity;
 	float Mass;
 	float Pressure;
-	float3 P_Force;
+	float3 padding;
 };
 
-//struct ParticleDraw
-//{
-//	uint Index;
-//};
 
 #endif

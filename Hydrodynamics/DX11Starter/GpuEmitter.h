@@ -14,7 +14,7 @@ struct GPUParticle
 	DirectX::XMFLOAT3 velocity;
 	float Mass;
 	float Pressure; 
-	DirectX::XMFLOAT3 P_Force;
+	DirectX::XMFLOAT3 padding;
 };
 
 struct ParticleSort
