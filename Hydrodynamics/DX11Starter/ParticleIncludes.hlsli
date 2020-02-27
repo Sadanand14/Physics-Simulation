@@ -8,7 +8,7 @@ struct Particle
 	float3 Velocity;
 	float Mass;
 	float Pressure;
-	float3 garbage;
+	float3 P_Force;
 };
 
 //struct ParticleDraw

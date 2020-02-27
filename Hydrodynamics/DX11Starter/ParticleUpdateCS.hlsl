@@ -41,16 +41,33 @@ void main( uint3 id : SV_DispatchThreadID )
 		const float r2 = dot(dir, dir);
 		if (r2 < (h * h)) 
 		{
-			const float W = kernel1 * pow(((h * h) - r2), 3);
-			particle.Density += currentParticle.Mass * W;
+			const float W1 = kernel1 * pow(((h * h) - r2), 3);
+			particle.Density += currentParticle.Mass * W1;
 		}
 	}
 
-	particle.Density = max(p0, particle.density);
+	particle.Density = max(p0, particle.Density);
 
-	particle.Pressure = K * (particle.density - p0);
+	particle.Pressure = K * (particle.Density - p0);
+
+	particle.P_Force = 0;
 
 
+	for (unsigned int i = 0; i < activeCount&& i!=id.x; ++i)
+	{
+		currentParticle = ParticlePool.Load(i);
+		const float3 dir = particle.Position - currentParticle.Position;
+		const float r2 = dot(dir, dir);
+		const float r = sqrt(r2);
+		if (r2 < (h * h))
+		{
+			const float3 rNorm = dir / r;
+			const float W2 = kernel2 * pow(h - r, 2);
+			particle.P_Force += (currentParticle.Mass / particle.Mass) * (2 * particle.Density * currentParticle.Density) * W2 * rNorm;
+		}
+	}	
+
+	particle.P_Force *= -1;
 	
 	//int wallCollision = 0, intersection = 0, internalCollision = 0;
 	//float3 blockedMoveDirections[5];
