@@ -13,8 +13,8 @@ struct GPUParticle
 	float Density;
 	DirectX::XMFLOAT3 velocity;
 	float Mass;
-	float Pressure; 
-	DirectX::XMFLOAT3 padding;
+	DirectX::XMFLOAT3 wallVel;
+	float padding;
 };
 
 struct ParticleSort
@@ -36,7 +36,9 @@ private:
 	DirectX::XMFLOAT4 m_startColor, m_endColor, m_rotRange;
 	std::vector<XMFLOAT4> m_planeArr;
 
-	SimpleComputeShader* m_initParticlesCS = nullptr,* m_updateParticleCS = nullptr,* m_emitParticleCS = nullptr,* m_updateArgsBufferCS = nullptr;
+	SimpleComputeShader* m_initParticlesCS = nullptr, * m_updateParticleCS = nullptr, * m_emitParticleCS = nullptr,
+		* m_updateArgsBufferCS = nullptr, * m_fluidUpdateCS = nullptr, * m_collisionCS = nullptr,
+		* m_finalUpdateCS = nullptr;
 
 	SimpleVertexShader* m_VS = nullptr;
 	SimplePixelShader* m_PS = nullptr;
@@ -57,8 +59,10 @@ public:
 		DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
 		ID3D11Device* device, ID3D11DeviceContext* context,
 		SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
-		SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
-		ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth,
+		SimpleComputeShader* fluidUpdate, SimpleComputeShader* collisionUpdate,
+		SimpleComputeShader* finalUpdate, SimpleVertexShader* vertexShader,
+		SimplePixelShader* pixelShader, ID3D11Buffer* vertexBuffer, 
+		unsigned int vertexCount, float modelWidth,
 		std::vector<DirectX::XMFLOAT4> planeArr
 	);
 

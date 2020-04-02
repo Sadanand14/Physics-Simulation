@@ -40,6 +40,7 @@ void main(uint3 id : SV_DispatchThreadID)
 
 	emitParticle.Density = 0.0f;
 	emitParticle.Mass = 1.0f;
+	emitParticle.Acceleration = 0.0f;
 
 	emitParticle.Velocity.x = startVel.x + (((random[0] - 0.5) * 4) - 1)* velRange.x;
 	emitParticle.Velocity.y = startVel.y + (((random[1] - 0.5) * 4) - 1)* velRange.y;

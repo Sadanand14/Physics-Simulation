@@ -66,10 +66,10 @@ private:
 	SimplePixelShader* pixelShader = nullptr;
 	
 	//GpuParticleStuff
-	SimpleComputeShader * particleUpdateCS = nullptr, * particleEmitCS = nullptr;
+	SimpleComputeShader * fluidUpdateCS = nullptr,*particleUpdateCS = nullptr, * particleEmitCS = nullptr;
+	SimpleComputeShader* collisionUpdateCS = nullptr, * finalUpdateCS = nullptr;;
 	SimpleVertexShader* gpuParticleVS = nullptr;
 	SimplePixelShader* gpuParticlePS = nullptr;
-
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix, viewMatrix, projectionMatrix;

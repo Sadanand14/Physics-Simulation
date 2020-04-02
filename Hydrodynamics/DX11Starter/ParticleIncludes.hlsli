@@ -7,8 +7,8 @@ struct Particle
 	float Density;
 	float3 Velocity;
 	float Mass;
-	float Pressure;
-	float3 padding;
+	float3 Acceleration;
+	float padding;
 };
 
 

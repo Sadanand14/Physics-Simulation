@@ -9,13 +9,16 @@ GPUEmitter::GPUEmitter
 	DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
 	ID3D11Device* device, ID3D11DeviceContext* context,
 	SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
-	SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader,
-	ID3D11Buffer* vertexBuffer, unsigned int vertexCount, float modelWidth,
+	SimpleComputeShader* fluidUpdate, SimpleComputeShader* collisionUpdate,
+	SimpleComputeShader* finalUpdate, SimpleVertexShader* vertexShader,
+	SimplePixelShader* pixelShader, ID3D11Buffer* vertexBuffer,
+	unsigned int vertexCount, float modelWidth,
 	std::vector<DirectX::XMFLOAT4> planeArr
 )
 	: m_maxParticles(maxParticles),m_context(context), m_emitParticleCS(emitParticles), m_updateParticleCS(updateParticles),
 	m_VS(vertexShader), m_PS(pixelShader), m_vertexBuffer(vertexBuffer), m_vertexCount(vertexCount), m_currentCount(0), m_width(modelWidth),
-	m_planeArr(planeArr)
+	m_planeArr(planeArr), m_fluidUpdateCS(fluidUpdate), m_collisionCS(collisionUpdate),
+	m_finalUpdateCS(finalUpdate)
 {	
 
 	m_emitterPos = emitterPos;
@@ -58,7 +61,7 @@ GPUEmitter::GPUEmitter
 
 	particlePoolBuff->Release();
 
-	m_h = 1.0f;
+	m_h = 5.0f;
 	m_kernel1 = 315.0f / (64.0f * DirectX::XM_PI * pow(m_h, 9));
 	m_kernel2 = -45.0f / (DirectX::XM_PI * pow(m_h, 6));
 }
@@ -107,14 +110,11 @@ void GPUEmitter::Update(float dt, float totaltime)
 
 	static DirectX::XMFLOAT3 gravity = DirectX::XMFLOAT3(0.0f,-9.8f,0.0f);
 	static float separationSpeed = 2.0f;
-	m_updateParticleCS->SetData("planeArr", m_planeArr.data(), 5 * sizeof(XMFLOAT4));
-	m_updateParticleCS->SetFloat("separationSpeed", separationSpeed);
-	m_updateParticleCS->SetFloat("dt", dt);
+
 	m_updateParticleCS->SetFloat3("gravity", gravity);
-	m_updateParticleCS->SetFloat("diametre", m_width);
+	m_updateParticleCS->SetFloat("dt", dt);
 	m_updateParticleCS->SetInt("activeCount", m_currentCount);
 	m_updateParticleCS->SetFloat("kernel1", m_kernel1);
-	m_updateParticleCS->SetFloat("kernel2", m_kernel2);
 	m_updateParticleCS->SetFloat("h", m_h);
 	m_updateParticleCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
 	m_updateParticleCS->CopyAllBufferData();
@@ -122,6 +122,33 @@ void GPUEmitter::Update(float dt, float totaltime)
 
 	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
 
+	m_fluidUpdateCS->SetShader();
+	m_fluidUpdateCS->SetFloat("dt", dt);
+	m_fluidUpdateCS->SetInt("activeCount", m_currentCount);
+	m_fluidUpdateCS->SetFloat("kernel1", m_kernel1);
+	m_fluidUpdateCS->SetFloat("kernel2", m_kernel2);
+	m_fluidUpdateCS->SetFloat("h", m_h);
+	m_fluidUpdateCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
+	m_fluidUpdateCS->CopyAllBufferData();
+	m_fluidUpdateCS->DispatchByThreads(m_currentCount, 1, 1);
+
+	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
+	m_collisionCS->SetShader();
+	m_collisionCS->SetData("planeArr", m_planeArr.data(), 5 * sizeof(XMFLOAT4));
+	m_collisionCS->SetFloat("diametre", m_width);
+	m_collisionCS->SetFloat("dt", dt);
+	m_collisionCS->SetInt("activeCount", m_currentCount);
+	m_collisionCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
+	m_collisionCS->CopyAllBufferData();
+	m_collisionCS->DispatchByThreads(m_currentCount, 1, 1);
+	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
+
+	m_finalUpdateCS->SetShader();
+	m_finalUpdateCS->SetFloat("dt", dt);
+	m_finalUpdateCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
+	m_finalUpdateCS->CopyAllBufferData();
+	m_finalUpdateCS->DispatchByThreads(m_currentCount, 1, 1);
+	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
 }
 
 void GPUEmitter::Draw(Camera* camera)
